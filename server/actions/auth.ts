@@ -1,12 +1,24 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { hash, compare } from 'bcryptjs';
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import prisma from "@/lib/prisma";
+import { compare } from "bcryptjs";
 
-export async function POST(req) {
-  const { name, email, password, role } = await req.json();
-  const hashedPassword = await hash(password, 10);
-  const user = await prisma.user.create({
-    data: { name, email, password: hashedPassword, role }
-  });
-  return NextResponse.json({ user });
-}
+export default NextAuth({
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+        if (!user || !(await compare(credentials.password, user.password))) {
+          throw new Error("Invalid credentials");
+        }
+        return { id: user.id, name: user.name, email: user.email, role: user.role };
+      },
+    }),
+  ],
+  secret: process.env.NEXTAUTH_SECRET,
+});

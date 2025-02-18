@@ -1,17 +1,27 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
+
 model User {
-  id       String  @id @default(uuid())
-  email    String  @unique
-  password String
-  name     String
-  role     String
-  createdAt DateTime @default(now())
+  id        String @id @default(uuid())
+  name      String
+  email     String @unique
+  password  String
+  role      String
+  courses   Course[] @relation("UserCourses")
+}
+
+model Course {
+  id        String  @id @default(uuid())
+  title     String
+  description String
+  instrument String
+  teacherId String
+  teacher   User @relation(fields: [teacherId], references: [id], name: "UserCourses")
 }

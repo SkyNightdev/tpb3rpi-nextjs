@@ -1,4 +1,8 @@
 export default function HomePage() {
-    return <h1>Page d'accueil détectée</h1>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <h1 className="text-3xl font-bold">Bienvenue sur MusiLearn 🎶</h1>
+      </div>
+    );
   }
   
